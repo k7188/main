@@ -1,0 +1,49 @@
+steps:
+  # Initialize Terraform for the specific project
+  - name: 'hashicorp/terraform:1.5'
+    id: 'init'
+    args:
+      - -chdir=terraform/$_TERRAFORM_PROJECT
+      - init
+      - -backend-config=bucket=${_TERRAFORM_STATE_BUCKET}
+      - -backend-config=prefix=terraform/state/${_TERRAFORM_PROJECT}
+
+  # Validate configuration
+  - name: 'hashicorp/terraform:1.5'
+    id: 'validate'
+    args:
+      - -chdir=terraform/$_TERRAFORM_PROJECT
+      - validate
+      - -no-color
+
+  # Plan changes
+  - name: 'hashicorp/terraform:1.5'
+    id: 'plan'
+    args:
+      - -chdir=terraform/$_TERRAFORM_PROJECT
+      - plan
+      - -var=project_id=$PROJECT_ID
+      - -var=region=$_REGION
+      - -out=tfplan
+      - -no-color
+
+  # Apply changes
+  - name: 'hashicorp/terraform:1.5'
+    id: 'apply'
+    args:
+      - -chdir=terraform/$_TERRAFORM_PROJECT
+      - apply
+      - -auto-approve
+      - tfplan
+      - -no-color
+
+# Substitution variables for different projects
+substitutions:
+  _TERRAFORM_PROJECT: 'cloudbuild-setup'  # Default to cloudbuild setup
+  _TERRAFORM_STATE_BUCKET: 'clcd-cloudbuild-huss-terraform-state'  # Your state bucket
+  _REGION: 'us-central1'
+
+# Timeout and service account
+timeout: 600s
+
+serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/hussain-cloudbuild@clcd-cloudbuild-huss.iam.gserviceaccount.com'
