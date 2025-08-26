@@ -47,3 +47,6 @@ substitutions:
 timeout: 600s
 
 serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/hussain-cloudbuild@clcd-cloudbuild-huss.iam.gserviceaccount.com'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
